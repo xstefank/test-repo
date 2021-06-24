@@ -14,3 +14,4 @@ jobs:
       - name: Echo target branch
         run: |
           echo Target branch is ${{ github.event.pull_request.base.ref }}
+          echo Target branch 2 is ${{github.base_ref}}
