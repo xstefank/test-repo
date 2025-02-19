@@ -1,4 +1,4 @@
-name: PR target branch ${{ github.event.number || 'workflow_dispatch' }}
+name: PR target branch
 
 on:
   pull_request:
