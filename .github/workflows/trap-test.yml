@@ -13,7 +13,6 @@ jobs:
           echo "doing normal work"
 
       - name: EXIT trap runs on failure (step still fails)
-        continue-on-error: true
         run: |
           trap 'echo "EXIT trap fired, exit code was $?"' EXIT
           echo "about to fail"
