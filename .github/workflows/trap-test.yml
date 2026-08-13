@@ -1,0 +1,43 @@
+name: Trap test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  trap:
+    runs-on: ubuntu-latest
+    steps:
+      - name: EXIT trap runs on success
+        run: |
+          trap 'echo "EXIT trap fired, exit code was $?"' EXIT
+          echo "doing normal work"
+
+      - name: EXIT trap runs on failure (step still fails)
+        continue-on-error: true
+        run: |
+          trap 'echo "EXIT trap fired, exit code was $?"' EXIT
+          echo "about to fail"
+          exit 7
+
+      - name: ERR trap only fires on non-zero commands
+        run: |
+          set -e
+          trap 'echo "ERR trap fired at line $LINENO, exit code $?"' ERR
+          echo "before failure"
+          false || true   # this is handled, so ERR should NOT fire
+          echo "still here"
+          ! grep nonexistent-pattern /etc/hostname
+          echo "after a negated failing command, ERR should not fire either"
+
+      - name: trap does not survive across steps
+        run: |
+          echo "this step never registered a trap, so nothing prints on exit"
+          echo "each run: step is a brand new shell process"
+
+      - name: trap fires on receiving a signal (SIGTERM)
+        run: |
+          trap 'echo "caught SIGTERM, cleaning up"; exit 0' TERM
+          # send TERM to this shell itself ($$) after 2s, simulating an external kill
+          ( sleep 2 && kill -TERM $$ ) &
+          sleep 30 &
+          wait
